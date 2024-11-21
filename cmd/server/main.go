@@ -11,6 +11,8 @@ import (
 
 	"github.com/aakashdeepsil/go-contributors-api/internal/config"
 	"github.com/aakashdeepsil/go-contributors-api/internal/database"
+	"github.com/aakashdeepsil/go-contributors-api/internal/graph"
+	"github.com/aakashdeepsil/go-contributors-api/internal/graph/resolvers"
 )
 
 func main() {
@@ -26,12 +28,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize repositories: %v", err)
 	}
-	log.Printf("Repositories initialized: %v", repos)
 
-	// Server setup code...
+	// Initialize resolver
+	resolver := resolvers.NewResolver(repos.Contributor, repos.Cache)
+
+	// Initialize router
+	router := graph.NewRouter(resolver)
+
+	// Server setup
 	server := &http.Server{
-		Addr: ":" + cfg.Port,
-		// Handler will be set later
+		Addr:    ":" + cfg.Port,
+		Handler: router,
 	}
 
 	// Graceful shutdown
@@ -49,6 +56,8 @@ func main() {
 	}()
 
 	log.Printf("Server starting on port %s", cfg.Port)
+	log.Printf("GraphQL playground available at http://localhost:%s", cfg.Port)
+
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalf("Server error: %v", err)
 	}
