@@ -1,0 +1,44 @@
+scalar Time
+
+type Contributor {
+  id: ID!
+  username: String!
+  email: String!
+  name: String!
+  avatarUrl: String
+  projects: [String!]!
+  joinedAt: Time!
+  updatedAt: Time!
+}
+
+input ContributorInput {
+  username: String!
+  email: String!
+  name: String!
+  avatarUrl: String
+  projects: [String!]
+}
+
+input UpdateContributorInput {
+  username: String
+  email: String
+  name: String
+  avatarUrl: String
+  projects: [String!]
+}
+
+type Query {
+  contributor(id: ID!): Contributor
+  contributorByUsername(username: String!): Contributor
+  contributors(limit: Int = 10, offset: Int = 0): [Contributor!]!
+}
+
+type Mutation {
+  createContributor(input: ContributorInput!): Contributor!
+  updateContributor(id: ID!, input: UpdateContributorInput!): Contributor!
+  deleteContributor(id: ID!): Boolean!
+}
+
+type Subscription {
+  contributorUpdated: Contributor!
+}
